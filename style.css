@@ -162,6 +162,40 @@ button:hover {
     color: #065f46;
 }
 
+/* ---------- Item buttons ---------- */
+.item.done strong {
+    text-decoration: line-through;
+    color: #6b7280;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.actions button {
+    margin-top: 0;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.btn-complete {
+    background-color: #16a34a;
+}
+
+.btn-complete:hover {
+    background-color: #15803d;
+}
+
+.btn-delete {
+    background-color: #dc2626;
+}
+
+.btn-delete:hover {
+    background-color: #b91c1c;
+}
+
 /* ---------- Mobile ---------- */
 @media (max-width: 600px) {
     .site-header {

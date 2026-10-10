@@ -24,9 +24,34 @@ if (document.querySelector("#task-form")) {
         taskMessage.className = "message " + type; // "message success" or "message error"
     }
 
+    // ---------- Mark an assignment as completed ----------
+    function completeTask(id) {
+        for (let i = 0; i < tasks.length; i++) {
+            if (tasks[i].id === id) {
+                tasks[i].completed = true;
+                break;
+            }
+        }
+        renderTasks();
+        showTaskMessage("Assignment marked as completed.", "success");
+    }
+
+    // ---------- Delete an assignment ----------
+    function deleteTask(id) {
+        for (let i = 0; i < tasks.length; i++) {
+            if (tasks[i].id === id) {
+                tasks.splice(i, 1);
+                break;
+            }
+        }
+        renderTasks();
+        showTaskMessage("Assignment deleted.", "success");
+    }
+
+
     // ---------- Draw the list on screen ----------
     function renderTasks() {
-        taskList.innerHTML = ""; // clear the old list first
+        taskList.innerHTML = "";
 
         if (tasks.length === 0) {
             taskList.innerHTML = "<li class='empty'>No assignments yet.</li>";
@@ -38,6 +63,9 @@ if (document.querySelector("#task-form")) {
 
             const li = document.createElement("li");
             li.className = "item";
+            if (task.completed) {
+                li.className = "item done";
+            }
 
             const status = task.completed ? "Completed" : "Pending";
 
@@ -49,6 +77,28 @@ if (document.querySelector("#task-form")) {
                 "<span class='badge status-" + status.toLowerCase() + "'>" +
                 status + "</span>";
 
+            const actions = document.createElement("div");
+            actions.className = "actions";
+
+            if (!task.completed) {
+                const completeBtn = document.createElement("button");
+                completeBtn.textContent = "Complete";
+                completeBtn.className = "btn-complete";
+                completeBtn.addEventListener("click", function () {
+                    completeTask(task.id);
+                });
+                actions.appendChild(completeBtn);
+            }
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "Delete";
+            deleteBtn.className = "btn-delete";
+            deleteBtn.addEventListener("click", function () {
+                deleteTask(task.id);
+            });
+            actions.appendChild(deleteBtn);
+
+            li.appendChild(actions);
             taskList.appendChild(li);
         }
     }
