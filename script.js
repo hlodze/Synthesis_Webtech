@@ -1,5 +1,5 @@
 // =====================================================
-// STUDENT LIFE HUB - script.js
+// Ashesi Life Planner - script.js
 // One shared script for all four pages.
 // Each section only runs on the page that has its form/elements.
 // =====================================================

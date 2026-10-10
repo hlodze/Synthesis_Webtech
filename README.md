@@ -1,4 +1,4 @@
-# Student Life Hub
+# Ashesi Life Planner
 
 A simple web application that helps university students organise their assignments, track their spending in Ghanaian cedis (GH₵), and plan their study time. Built with HTML, CSS, and vanilla JavaScript, with no frameworks or backend.
 
