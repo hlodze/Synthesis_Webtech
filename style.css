@@ -226,6 +226,10 @@ button:hover {
     color: #b91c1c;
 }
 
+.summary.two-col {
+    grid-template-columns: repeat(2, 1fr);
+}
+
 /* ---------- Mobile ---------- */
 @media (max-width: 600px) {
     .site-header {

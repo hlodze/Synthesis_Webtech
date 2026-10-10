@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Planner | Student Life Hub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <h1>Student Life Hub</h1>
+        <nav>
+            <a href="index.html">Dashboard</a>
+            <a href="tasks.html">Assignments</a>
+            <a href="budget.html">Budget</a>
+            <a href="study.html" class="active">Study Planner</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="card">
+            <h2>Progress</h2>
+            <div class="summary two-col">
+                <div class="stat">
+                    <span class="stat-label">Planned activities</span>
+                    <span class="stat-value" id="study-total">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Completed</span>
+                    <span class="stat-value" id="study-completed">0</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Add a Study Activity</h2>
+            <form id="study-form">
+                <label for="study-subject">Subject</label>
+                <input type="text" id="study-subject" placeholder="e.g. Mathematics">
+
+                <label for="study-description">Description</label>
+                <input type="text" id="study-description" placeholder="e.g. Revise chapter 4 exercises">
+
+                <label for="study-date">Date</label>
+                <input type="date" id="study-date">
+
+                <button type="submit">Add Activity</button>
+            </form>
+            <p id="study-message" class="message"></p>
+        </section>
+
+        <section class="card">
+            <h2>My Study Plan</h2>
+            <ul id="study-list" class="item-list"></ul>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

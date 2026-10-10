@@ -353,3 +353,167 @@ if (document.querySelector("#expense-form")) {
     renderExpenses();
     updateSummary();
 }
+
+// =====================================================
+// STUDY PLANNER (study.html)
+// =====================================================
+
+if (document.querySelector("#study-form")) {
+
+    // ---------- Data ----------
+    let activities = loadData("activities", []);
+    let nextActivityId = 1;
+
+    for (let i = 0; i < activities.length; i++) {
+        if (activities[i].id >= nextActivityId) {
+            nextActivityId = activities[i].id + 1;
+        }
+    }
+
+    // ---------- Grab page elements ----------
+    const studyForm = document.querySelector("#study-form");
+    const studySubjectInput = document.querySelector("#study-subject");
+    const studyDescriptionInput = document.querySelector("#study-description");
+    const studyDateInput = document.querySelector("#study-date");
+    const studyMessage = document.querySelector("#study-message");
+    const studyList = document.querySelector("#study-list");
+    const studyTotalDisplay = document.querySelector("#study-total");
+    const studyCompletedDisplay = document.querySelector("#study-completed");
+
+    // ---------- Show feedback ----------
+    function showStudyMessage(text, type) {
+        studyMessage.textContent = text;
+        studyMessage.className = "message " + type;
+    }
+
+    // ---------- Count completed activities ----------
+    function countCompleted() {
+        let count = 0;
+        for (let i = 0; i < activities.length; i++) {
+            if (activities[i].completed) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    // ---------- Update the progress boxes ----------
+    function updateStudyProgress() {
+        studyTotalDisplay.textContent = activities.length;
+        studyCompletedDisplay.textContent = countCompleted();
+    }
+
+    // ---------- Mark an activity as completed ----------
+    function completeActivity(id) {
+        for (let i = 0; i < activities.length; i++) {
+            if (activities[i].id === id) {
+                activities[i].completed = true;
+                break;
+            }
+        }
+        saveData("activities", activities);
+        renderActivities();
+        updateStudyProgress();
+        showStudyMessage("Activity marked as completed.", "success");
+    }
+
+    // ---------- Delete an activity ----------
+    function deleteActivity(id) {
+        for (let i = 0; i < activities.length; i++) {
+            if (activities[i].id === id) {
+                activities.splice(i, 1);
+                break;
+            }
+        }
+        saveData("activities", activities);
+        renderActivities();
+        updateStudyProgress();
+        showStudyMessage("Activity deleted.", "success");
+    }
+
+    // ---------- Draw the list ----------
+    function renderActivities() {
+        studyList.innerHTML = "";
+
+        if (activities.length === 0) {
+            studyList.innerHTML = "<li class='empty'>No study activities planned yet.</li>";
+            return;
+        }
+
+        for (let i = 0; i < activities.length; i++) {
+            const activity = activities[i];
+
+            const li = document.createElement("li");
+            li.className = "item";
+            if (activity.completed) {
+                li.className = "item done";
+            }
+
+            const status = activity.completed ? "Completed" : "Pending";
+
+            li.innerHTML =
+                "<strong>" + activity.subject + ": " + activity.description + "</strong>" +
+                "<span>" + activity.date + "</span>" +
+                "<span class='badge status-" + status.toLowerCase() + "'>" +
+                status + "</span>";
+
+            const actions = document.createElement("div");
+            actions.className = "actions";
+
+            if (!activity.completed) {
+                const completeBtn = document.createElement("button");
+                completeBtn.textContent = "Complete";
+                completeBtn.className = "btn-complete";
+                completeBtn.addEventListener("click", function () {
+                    completeActivity(activity.id);
+                });
+                actions.appendChild(completeBtn);
+            }
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "Delete";
+            deleteBtn.className = "btn-delete";
+            deleteBtn.addEventListener("click", function () {
+                deleteActivity(activity.id);
+            });
+            actions.appendChild(deleteBtn);
+
+            li.appendChild(actions);
+            studyList.appendChild(li);
+        }
+    }
+
+    // ---------- Handle the form ----------
+    studyForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const subject = studySubjectInput.value.trim();
+        const description = studyDescriptionInput.value.trim();
+        const date = studyDateInput.value;
+
+        if (subject === "" || description === "" || date === "") {
+            showStudyMessage("Please fill in the subject, description and date.", "error");
+            return;
+        }
+
+        const newActivity = {
+            id: nextActivityId,
+            subject: subject,
+            description: description,
+            date: date,
+            completed: false
+        };
+        activities.push(newActivity);
+        nextActivityId++;
+        saveData("activities", activities);
+
+        renderActivities();
+        updateStudyProgress();
+        studyForm.reset();
+        showStudyMessage("Study activity added!", "success");
+    });
+
+    // Draw everything once when the page first loads
+    renderActivities();
+    updateStudyProgress();
+}
