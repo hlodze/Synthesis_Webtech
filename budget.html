@@ -45,6 +45,23 @@
             <p id="budget-warning" class="message error"></p>
         </section>
 
+        <section class="card" id="manage-card">
+            <h2>Edit This Budget</h2>
+            <form id="edit-budget-form">
+                <label for="edit-name">Budget name</label>
+                <input type="text" id="edit-name">
+
+                <label for="edit-amount">Starting amount (GH₵)</label>
+                <input type="number" id="edit-amount" step="0.01" min="0">
+
+                <div class="form-buttons">
+                    <button type="submit">Save Changes</button>
+                    <button type="button" id="delete-budget-btn" class="btn-delete">Delete This Budget</button>
+                </div>
+            </form>
+            <p id="manage-message" class="message"></p>
+        </section>
+
         <section class="card">
             <h2>Create a New Budget</h2>
             <form id="budget-form">

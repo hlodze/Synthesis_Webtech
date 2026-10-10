@@ -6,7 +6,7 @@
 
 
 // =====================================================
-// SHARED HELPERS (saving, loading, safe text)
+// SHARED HELPERS (saving, loading, safe text, budgets)
 // =====================================================
 
 // Save any value (array, object, number) under a name
@@ -69,6 +69,7 @@ function getActiveBudget(budgets) {
     }
     return null; // no budgets exist yet
 }
+
 
 // =====================================================
 // ASSIGNMENT TRACKER (tasks.html)
@@ -230,6 +231,7 @@ if (document.querySelector("#task-form")) {
     renderTasks();
 }
 
+
 // =====================================================
 // BUDGET TRACKER (budget.html)
 // =====================================================
@@ -272,6 +274,12 @@ if (document.querySelector("#expense-form")) {
     const startingDisplay = document.querySelector("#starting-display");
     const totalDisplay = document.querySelector("#total-display");
     const remainingDisplay = document.querySelector("#remaining-display");
+    const manageCard = document.querySelector("#manage-card");
+    const editForm = document.querySelector("#edit-budget-form");
+    const editNameInput = document.querySelector("#edit-name");
+    const editAmountInput = document.querySelector("#edit-amount");
+    const deleteBudgetBtn = document.querySelector("#delete-budget-btn");
+    const manageMessage = document.querySelector("#manage-message");
 
     // ---------- Show feedback ----------
     function showBudgetMessage(text, type) {
@@ -284,11 +292,18 @@ if (document.querySelector("#expense-form")) {
         budgetFormMessage.className = "message " + type;
     }
 
+    function showManageMessage(text, type) {
+        manageMessage.textContent = text;
+        manageMessage.className = "message " + type;
+    }
+
     // ---------- Save everything ----------
     function saveBudgets() {
         saveData("budgets", budgets);
         if (activeBudget !== null) {
             saveData("activeBudgetId", activeBudget.id);
+        } else {
+            localStorage.removeItem("activeBudgetId");
         }
     }
 
@@ -320,7 +335,7 @@ if (document.querySelector("#expense-form")) {
     function calculateTotal() {
         let total = 0;
         for (let i = 0; i < activeBudget.expenses.length; i++) {
-            total = total + activeBudget.expenses[i].amount;
+            total = total + activeBudget.expenses[i].amount; // amounts are numbers, so this is real addition
         }
         return total;
     }
@@ -411,11 +426,23 @@ if (document.querySelector("#expense-form")) {
         }
     }
 
+    // ---------- Fill the edit form with the active budget ----------
+    function fillEditForm() {
+        if (activeBudget === null) {
+            manageCard.style.display = "none"; // nothing to edit
+            return;
+        }
+        manageCard.style.display = "block";
+        editNameInput.value = activeBudget.name;
+        editAmountInput.value = activeBudget.amount;
+    }
+
     // ---------- Redraw the whole page ----------
     function refreshAll() {
         renderBudgetSelect();
         updateSummary();
         renderExpenses();
+        fillEditForm();
     }
 
     // ---------- Switch budgets ----------
@@ -432,6 +459,7 @@ if (document.querySelector("#expense-form")) {
         saveBudgets();
         refreshAll();
         showBudgetMessage("", "success");
+        showManageMessage("", "success");
     });
 
     // ---------- Create a new budget ----------
@@ -516,9 +544,73 @@ if (document.querySelector("#expense-form")) {
         showBudgetMessage("Expense added!", "success");
     });
 
+    // ---------- Edit the active budget ----------
+    editForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const name = editNameInput.value.trim();
+        const amount = Number(editAmountInput.value);
+
+        if (name === "") {
+            showManageMessage("Please give the budget a name.", "error");
+            return;
+        }
+
+        if (editAmountInput.value === "" || isNaN(amount) || amount <= 0) {
+            showManageMessage("Enter a starting amount greater than 0.", "error");
+            return;
+        }
+
+        // Check for duplicate names, ignoring the budget we're editing
+        for (let i = 0; i < budgets.length; i++) {
+            if (budgets[i].id !== activeBudget.id &&
+                budgets[i].name.toLowerCase() === name.toLowerCase()) {
+                showManageMessage("A budget with that name already exists.", "error");
+                return;
+            }
+        }
+
+        activeBudget.name = name;
+        activeBudget.amount = amount;
+
+        saveBudgets();
+        refreshAll();
+        showManageMessage("Budget updated.", "success");
+    });
+
+    // ---------- Delete the active budget ----------
+    deleteBudgetBtn.addEventListener("click", function () {
+        const sure = confirm(
+            "Delete \"" + activeBudget.name + "\" and all its expenses? This cannot be undone."
+        );
+
+        if (!sure) {
+            return; // user pressed Cancel
+        }
+
+        for (let i = 0; i < budgets.length; i++) {
+            if (budgets[i].id === activeBudget.id) {
+                budgets.splice(i, 1);
+                break;
+            }
+        }
+
+        // Switch to another budget, or to none if that was the last one
+        if (budgets.length > 0) {
+            activeBudget = budgets[0];
+        } else {
+            activeBudget = null;
+        }
+
+        saveBudgets();
+        refreshAll();
+        showBudgetFormMessage("Budget deleted.", "success");
+    });
+
     // Draw everything once when the page first loads
     refreshAll();
 }
+
 
 // =====================================================
 // STUDY PLANNER (study.html)
