@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignments | Student Life Hub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <h1>Student Life Hub</h1>
+        <nav>
+            <a href="index.html">Dashboard</a>
+            <a href="tasks.html" class="active">Assignments</a>
+            <a href="budget.html">Budget</a>
+            <a href="study.html">Study Planner</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="card">
+            <h2>Add an Assignment</h2>
+            <form id="task-form">
+                <label for="task-title">Title</label>
+                <input type="text" id="task-title" placeholder="e.g. Lab report 3">
+
+                <label for="task-subject">Subject</label>
+                <input type="text" id="task-subject" placeholder="e.g. Mathematics">
+
+                <label for="task-due">Due date</label>
+                <input type="date" id="task-due">
+
+                <label for="task-priority">Priority</label>
+                <select id="task-priority">
+                    <option value="Low">Low</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="High">High</option>
+                </select>
+
+                <button type="submit">Add Assignment</button>
+            </form>
+            <p id="task-message" class="message"></p>
+        </section>
+
+        <section class="card">
+            <h2>My Assignments</h2>
+            <ul id="task-list" class="item-list"></ul>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
