@@ -110,6 +110,58 @@ button:hover {
     margin: 0;
 }
 
+/* ---------- List items and badges ---------- */
+.item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.item strong {
+    flex: 1 1 100%;
+}
+
+.item .empty,
+.empty {
+    color: #6b7280;
+    padding: 12px;
+}
+
+.badge {
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.priority-high {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+.priority-medium {
+    background-color: #fef3c7;
+    color: #b45309;
+}
+
+.priority-low {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.status-pending {
+    background-color: #e0e7ff;
+    color: #3730a3;
+}
+
+.status-completed {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
 /* ---------- Mobile ---------- */
 @media (max-width: 600px) {
     .site-header {
