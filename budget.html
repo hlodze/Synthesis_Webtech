@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget | Student Life Hub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <h1>Student Life Hub</h1>
+        <nav>
+            <a href="index.html">Dashboard</a>
+            <a href="tasks.html">Assignments</a>
+            <a href="budget.html" class="active">Budget</a>
+            <a href="study.html">Study Planner</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="card">
+            <h2>Budget Summary</h2>
+            <div class="summary">
+                <div class="stat">
+                    <span class="stat-label">Starting budget</span>
+                    <span class="stat-value" id="starting-display">GH₵ 0.00</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Total expenses</span>
+                    <span class="stat-value" id="total-display">GH₵ 0.00</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Remaining</span>
+                    <span class="stat-value" id="remaining-display">GH₵ 0.00</span>
+                </div>
+            </div>
+            <p id="budget-warning" class="message error"></p>
+        </section>
+
+        <section class="card">
+            <h2>Starting Budget</h2>
+            <form id="budget-form">
+                <label for="budget-amount">Amount (GH₵)</label>
+                <input type="number" id="budget-amount" step="0.01" min="0" placeholder="e.g. 1500">
+                <button type="submit">Set Budget</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Add an Expense</h2>
+            <form id="expense-form">
+                <label for="expense-description">Description</label>
+                <input type="text" id="expense-description" placeholder="e.g. Lunch at the canteen">
+
+                <label for="expense-amount">Amount (GH₵)</label>
+                <input type="number" id="expense-amount" step="0.01" min="0" placeholder="e.g. 25.50">
+
+                <label for="expense-category">Category</label>
+                <select id="expense-category">
+                    <option value="Food">Food</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Books">Books</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <label for="expense-date">Date</label>
+                <input type="date" id="expense-date">
+
+                <button type="submit">Add Expense</button>
+            </form>
+            <p id="budget-message" class="message"></p>
+        </section>
+
+        <section class="card">
+            <h2>My Expenses</h2>
+            <ul id="expense-list" class="item-list"></ul>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
