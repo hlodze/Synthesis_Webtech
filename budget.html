@@ -21,7 +21,13 @@
 
     <main>
         <section class="card">
-            <h2>Budget Summary</h2>
+            <h2>My Budgets</h2>
+            <label for="budget-select">Active budget</label>
+            <select id="budget-select"></select>
+        </section>
+
+        <section class="card">
+            <h2 id="summary-title">Budget Summary</h2>
             <div class="summary">
                 <div class="stat">
                     <span class="stat-label">Starting budget</span>
@@ -40,12 +46,17 @@
         </section>
 
         <section class="card">
-            <h2>Starting Budget</h2>
+            <h2>Create a New Budget</h2>
             <form id="budget-form">
-                <label for="budget-amount">Amount (GH₵)</label>
+                <label for="budget-name">Budget name</label>
+                <input type="text" id="budget-name" placeholder="e.g. Semester 1">
+
+                <label for="budget-amount">Starting amount (GH₵)</label>
                 <input type="number" id="budget-amount" step="0.01" min="0" placeholder="e.g. 1500">
-                <button type="submit">Set Budget</button>
+
+                <button type="submit">Create Budget</button>
             </form>
+            <p id="budget-form-message" class="message"></p>
         </section>
 
         <section class="card">

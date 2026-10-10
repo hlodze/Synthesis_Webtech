@@ -256,6 +256,21 @@ button:hover {
     background-color: #1d4ed8;
 }
 
+/* ---------- Budget selector ---------- */
+.card>label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: bold;
+}
+
+#budget-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
 /* ---------- Mobile ---------- */
 @media (max-width: 600px) {
     .site-header {

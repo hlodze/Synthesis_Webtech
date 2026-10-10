@@ -30,6 +30,45 @@ function escapeHTML(text) {
     return div.innerHTML;     // reading innerHTML back gives the safe version
 }
 
+// Load all budgets. On first run after this update, convert the old
+// single budget and expense list into one budget so nothing is lost.
+function loadBudgets() {
+    let budgets = loadData("budgets", null);
+
+    if (budgets === null) {
+        budgets = [];
+        const oldAmount = loadData("startingBudget", 0);
+        const oldExpenses = loadData("expenses", []);
+
+        if (oldAmount > 0 || oldExpenses.length > 0) {
+            budgets.push({
+                id: 1,
+                name: "My Budget",
+                amount: oldAmount,
+                expenses: oldExpenses
+            });
+        }
+        saveData("budgets", budgets);
+    }
+
+    return budgets;
+}
+
+// Find the budget the user was last viewing (or the first one)
+function getActiveBudget(budgets) {
+    const activeId = loadData("activeBudgetId", null);
+
+    for (let i = 0; i < budgets.length; i++) {
+        if (budgets[i].id === activeId) {
+            return budgets[i];
+        }
+    }
+
+    if (budgets.length > 0) {
+        return budgets[0];
+    }
+    return null; // no budgets exist yet
+}
 
 // =====================================================
 // ASSIGNMENT TRACKER (tasks.html)
@@ -191,7 +230,6 @@ if (document.querySelector("#task-form")) {
     renderTasks();
 }
 
-
 // =====================================================
 // BUDGET TRACKER (budget.html)
 // =====================================================
@@ -199,20 +237,30 @@ if (document.querySelector("#task-form")) {
 if (document.querySelector("#expense-form")) {
 
     // ---------- Data ----------
-    let startingBudget = loadData("startingBudget", 0);
-    let expenses = loadData("expenses", []);
+    let budgets = loadBudgets();
+    let activeBudget = getActiveBudget(budgets);
+    let nextBudgetId = 1;
     let nextExpenseId = 1;
 
-    // Continue the id numbering after the highest saved id
-    for (let i = 0; i < expenses.length; i++) {
-        if (expenses[i].id >= nextExpenseId) {
-            nextExpenseId = expenses[i].id + 1;
+    // Continue id numbering after the highest saved ids
+    for (let i = 0; i < budgets.length; i++) {
+        if (budgets[i].id >= nextBudgetId) {
+            nextBudgetId = budgets[i].id + 1;
+        }
+        for (let j = 0; j < budgets[i].expenses.length; j++) {
+            if (budgets[i].expenses[j].id >= nextExpenseId) {
+                nextExpenseId = budgets[i].expenses[j].id + 1;
+            }
         }
     }
 
     // ---------- Grab page elements ----------
+    const budgetSelect = document.querySelector("#budget-select");
+    const summaryTitle = document.querySelector("#summary-title");
     const budgetForm = document.querySelector("#budget-form");
+    const budgetNameInput = document.querySelector("#budget-name");
     const budgetInput = document.querySelector("#budget-amount");
+    const budgetFormMessage = document.querySelector("#budget-form-message");
     const expenseForm = document.querySelector("#expense-form");
     const descriptionInput = document.querySelector("#expense-description");
     const amountInput = document.querySelector("#expense-amount");
@@ -231,21 +279,69 @@ if (document.querySelector("#expense-form")) {
         budgetMessage.className = "message " + type;
     }
 
-    // ---------- Add up all expenses ----------
+    function showBudgetFormMessage(text, type) {
+        budgetFormMessage.textContent = text;
+        budgetFormMessage.className = "message " + type;
+    }
+
+    // ---------- Save everything ----------
+    function saveBudgets() {
+        saveData("budgets", budgets);
+        if (activeBudget !== null) {
+            saveData("activeBudgetId", activeBudget.id);
+        }
+    }
+
+    // ---------- Fill the budget dropdown ----------
+    function renderBudgetSelect() {
+        budgetSelect.innerHTML = "";
+
+        if (budgets.length === 0) {
+            const option = document.createElement("option");
+            option.textContent = "No budgets yet";
+            budgetSelect.appendChild(option);
+            budgetSelect.disabled = true;
+            return;
+        }
+
+        budgetSelect.disabled = false;
+
+        for (let i = 0; i < budgets.length; i++) {
+            const option = document.createElement("option");
+            option.value = budgets[i].id;
+            option.textContent = budgets[i].name; // textContent keeps typed names safe
+            budgetSelect.appendChild(option);
+        }
+
+        budgetSelect.value = activeBudget.id;
+    }
+
+    // ---------- Add up the active budget's expenses ----------
     function calculateTotal() {
         let total = 0;
-        for (let i = 0; i < expenses.length; i++) {
-            total = total + expenses[i].amount; // amounts are numbers, so this is real addition
+        for (let i = 0; i < activeBudget.expenses.length; i++) {
+            total = total + activeBudget.expenses[i].amount;
         }
         return total;
     }
 
     // ---------- Update the three summary boxes ----------
     function updateSummary() {
-        const total = calculateTotal();
-        const remaining = startingBudget - total;
+        if (activeBudget === null) {
+            summaryTitle.textContent = "Budget Summary";
+            startingDisplay.textContent = "GH₵ 0.00";
+            totalDisplay.textContent = "GH₵ 0.00";
+            remainingDisplay.textContent = "GH₵ 0.00";
+            remainingDisplay.className = "stat-value";
+            budgetWarning.textContent = "";
+            return;
+        }
 
-        startingDisplay.textContent = "GH₵ " + startingBudget.toFixed(2);
+        const total = calculateTotal();
+        const remaining = activeBudget.amount - total;
+
+        summaryTitle.textContent = "Summary: " + activeBudget.name;
+        startingDisplay.textContent = "GH₵ " + activeBudget.amount.toFixed(2);
         totalDisplay.textContent = "GH₵ " + total.toFixed(2);
         remainingDisplay.textContent = "GH₵ " + remaining.toFixed(2);
 
@@ -253,7 +349,7 @@ if (document.querySelector("#expense-form")) {
             remainingDisplay.className = "stat-value negative";
             budgetWarning.textContent =
                 "Warning: you have spent GH₵ " + Math.abs(remaining).toFixed(2) +
-                " more than your budget.";
+                " more than this budget.";
         } else {
             remainingDisplay.className = "stat-value";
             budgetWarning.textContent = "";
@@ -262,13 +358,13 @@ if (document.querySelector("#expense-form")) {
 
     // ---------- Delete an expense ----------
     function deleteExpense(id) {
-        for (let i = 0; i < expenses.length; i++) {
-            if (expenses[i].id === id) {
-                expenses.splice(i, 1);
+        for (let i = 0; i < activeBudget.expenses.length; i++) {
+            if (activeBudget.expenses[i].id === id) {
+                activeBudget.expenses.splice(i, 1);
                 break;
             }
         }
-        saveData("expenses", expenses);
+        saveBudgets();
         renderExpenses();
         updateSummary();
         showBudgetMessage("Expense deleted.", "success");
@@ -278,13 +374,18 @@ if (document.querySelector("#expense-form")) {
     function renderExpenses() {
         expenseList.innerHTML = "";
 
-        if (expenses.length === 0) {
-            expenseList.innerHTML = "<li class='empty'>No expenses recorded yet.</li>";
+        if (activeBudget === null) {
+            expenseList.innerHTML = "<li class='empty'>Create a budget to start recording expenses.</li>";
             return;
         }
 
-        for (let i = 0; i < expenses.length; i++) {
-            const expense = expenses[i];
+        if (activeBudget.expenses.length === 0) {
+            expenseList.innerHTML = "<li class='empty'>No expenses recorded in this budget yet.</li>";
+            return;
+        }
+
+        for (let i = 0; i < activeBudget.expenses.length; i++) {
+            const expense = activeBudget.expenses[i];
 
             const li = document.createElement("li");
             li.className = "item";
@@ -310,22 +411,68 @@ if (document.querySelector("#expense-form")) {
         }
     }
 
-    // ---------- Set the starting budget ----------
+    // ---------- Redraw the whole page ----------
+    function refreshAll() {
+        renderBudgetSelect();
+        updateSummary();
+        renderExpenses();
+    }
+
+    // ---------- Switch budgets ----------
+    budgetSelect.addEventListener("change", function () {
+        const chosenId = Number(budgetSelect.value);
+
+        for (let i = 0; i < budgets.length; i++) {
+            if (budgets[i].id === chosenId) {
+                activeBudget = budgets[i];
+                break;
+            }
+        }
+
+        saveBudgets();
+        refreshAll();
+        showBudgetMessage("", "success");
+    });
+
+    // ---------- Create a new budget ----------
     budgetForm.addEventListener("submit", function (event) {
         event.preventDefault();
 
+        const name = budgetNameInput.value.trim();
         const amount = Number(budgetInput.value);
 
-        if (budgetInput.value === "" || isNaN(amount) || amount <= 0) {
-            showBudgetMessage("Enter a starting budget greater than 0.", "error");
+        if (name === "") {
+            showBudgetFormMessage("Please give the budget a name.", "error");
             return;
         }
 
-        startingBudget = amount;
-        saveData("startingBudget", startingBudget);
-        updateSummary();
+        if (budgetInput.value === "" || isNaN(amount) || amount <= 0) {
+            showBudgetFormMessage("Enter a starting amount greater than 0.", "error");
+            return;
+        }
+
+        // Don't allow two budgets with the same name
+        for (let i = 0; i < budgets.length; i++) {
+            if (budgets[i].name.toLowerCase() === name.toLowerCase()) {
+                showBudgetFormMessage("A budget with that name already exists.", "error");
+                return;
+            }
+        }
+
+        const newBudget = {
+            id: nextBudgetId,
+            name: name,
+            amount: amount,
+            expenses: []
+        };
+        budgets.push(newBudget);
+        nextBudgetId++;
+        activeBudget = newBudget; // switch to the new budget straight away
+
+        saveBudgets();
+        refreshAll();
         budgetForm.reset();
-        showBudgetMessage("Starting budget set.", "success");
+        showBudgetFormMessage("Budget created!", "success");
     });
 
     // ---------- Add an expense ----------
@@ -337,8 +484,8 @@ if (document.querySelector("#expense-form")) {
         const category = categoryInput.value;
         const date = dateInput.value;
 
-        if (startingBudget <= 0) {
-            showBudgetMessage("Set your starting budget first.", "error");
+        if (activeBudget === null) {
+            showBudgetMessage("Create a budget first.", "error");
             return;
         }
 
@@ -359,10 +506,10 @@ if (document.querySelector("#expense-form")) {
             category: category,
             date: date
         };
-        expenses.push(newExpense);
+        activeBudget.expenses.push(newExpense);
         nextExpenseId++;
-        saveData("expenses", expenses);
 
+        saveBudgets();
         renderExpenses();
         updateSummary();
         expenseForm.reset();
@@ -370,10 +517,8 @@ if (document.querySelector("#expense-form")) {
     });
 
     // Draw everything once when the page first loads
-    renderExpenses();
-    updateSummary();
+    refreshAll();
 }
-
 
 // =====================================================
 // STUDY PLANNER (study.html)
@@ -550,8 +695,10 @@ if (document.querySelector("#dash-outstanding")) {
 
     // ---------- Load the saved data ----------
     const tasks = loadData("tasks", []);
-    const expenses = loadData("expenses", []);
-    const startingBudget = loadData("startingBudget", 0);
+    const budgets = loadBudgets();
+    const activeBudget = getActiveBudget(budgets);
+    const expenses = activeBudget ? activeBudget.expenses : [];
+    const startingBudget = activeBudget ? activeBudget.amount : 0;
     const activities = loadData("activities", []);
 
     // ---------- Grab page elements ----------
