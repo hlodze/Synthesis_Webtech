@@ -135,6 +135,8 @@ button:hover {
     border-radius: 999px;
     font-size: 0.8rem;
     font-weight: bold;
+    background-color: #e5e7eb;
+    color: #374151;
 }
 
 .priority-high {
@@ -267,5 +269,15 @@ button:hover {
 
     .site-header nav a {
         margin: 0 12px 0 0;
+    }
+
+    .actions {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .link-btn {
+        width: 100%;
+        text-align: center;
     }
 }

@@ -1,5 +1,12 @@
 // =====================================================
-// SHARED HELPERS (saving and loading)
+// STUDENT LIFE HUB - script.js
+// One shared script for all four pages.
+// Each section only runs on the page that has its form/elements.
+// =====================================================
+
+
+// =====================================================
+// SHARED HELPERS (saving, loading, safe text)
 // =====================================================
 
 // Save any value (array, object, number) under a name
@@ -16,12 +23,18 @@ function loadData(key, fallback) {
     return JSON.parse(saved);
 }
 
+// Make user-typed text safe to place inside innerHTML
+function escapeHTML(text) {
+    const div = document.createElement("div");
+    div.textContent = text;   // textContent treats the text as plain text
+    return div.innerHTML;     // reading innerHTML back gives the safe version
+}
+
 
 // =====================================================
 // ASSIGNMENT TRACKER (tasks.html)
 // =====================================================
 
-// Only run this section if the assignment form exists on this page
 if (document.querySelector("#task-form")) {
 
     // ---------- Data ----------
@@ -34,6 +47,7 @@ if (document.querySelector("#task-form")) {
             nextTaskId = tasks[i].id + 1;
         }
     }
+
     // ---------- Grab page elements ----------
     const taskForm = document.querySelector("#task-form");
     const titleInput = document.querySelector("#task-title");
@@ -54,7 +68,7 @@ if (document.querySelector("#task-form")) {
         for (let i = 0; i < tasks.length; i++) {
             if (tasks[i].id === id) {
                 tasks[i].completed = true;
-                break;
+                break; // found it, no need to keep looping
             }
         }
         saveData("tasks", tasks);
@@ -66,7 +80,7 @@ if (document.querySelector("#task-form")) {
     function deleteTask(id) {
         for (let i = 0; i < tasks.length; i++) {
             if (tasks[i].id === id) {
-                tasks.splice(i, 1);
+                tasks.splice(i, 1); // remove 1 item at position i
                 break;
             }
         }
@@ -75,10 +89,9 @@ if (document.querySelector("#task-form")) {
         showTaskMessage("Assignment deleted.", "success");
     }
 
-
     // ---------- Draw the list on screen ----------
     function renderTasks() {
-        taskList.innerHTML = "";
+        taskList.innerHTML = ""; // clear the old list first
 
         if (tasks.length === 0) {
             taskList.innerHTML = "<li class='empty'>No assignments yet.</li>";
@@ -91,22 +104,24 @@ if (document.querySelector("#task-form")) {
             const li = document.createElement("li");
             li.className = "item";
             if (task.completed) {
-                li.className = "item done";
+                li.className = "item done"; // lets CSS strike through the title
             }
 
             const status = task.completed ? "Completed" : "Pending";
 
             li.innerHTML =
-                "<strong>" + task.title + "</strong>" +
-                "<span>" + task.subject + " &bull; Due " + task.due + "</span>" +
+                "<strong>" + escapeHTML(task.title) + "</strong>" +
+                "<span>" + escapeHTML(task.subject) + " &bull; Due " + task.due + "</span>" +
                 "<span class='badge priority-" + task.priority.toLowerCase() + "'>" +
                 task.priority + "</span>" +
                 "<span class='badge status-" + status.toLowerCase() + "'>" +
                 status + "</span>";
 
+            // Container for the buttons
             const actions = document.createElement("div");
             actions.className = "actions";
 
+            // Complete button (only shown while the assignment is pending)
             if (!task.completed) {
                 const completeBtn = document.createElement("button");
                 completeBtn.textContent = "Complete";
@@ -117,6 +132,7 @@ if (document.querySelector("#task-form")) {
                 actions.appendChild(completeBtn);
             }
 
+            // Delete button (always shown)
             const deleteBtn = document.createElement("button");
             deleteBtn.textContent = "Delete";
             deleteBtn.className = "btn-delete";
@@ -171,9 +187,10 @@ if (document.querySelector("#task-form")) {
         showTaskMessage("Assignment added!", "success");
     });
 
-    // Show the (empty) list message when the page first loads
+    // Draw the list when the page first loads
     renderTasks();
 }
+
 
 // =====================================================
 // BUDGET TRACKER (budget.html)
@@ -186,11 +203,13 @@ if (document.querySelector("#expense-form")) {
     let expenses = loadData("expenses", []);
     let nextExpenseId = 1;
 
+    // Continue the id numbering after the highest saved id
     for (let i = 0; i < expenses.length; i++) {
         if (expenses[i].id >= nextExpenseId) {
             nextExpenseId = expenses[i].id + 1;
         }
     }
+
     // ---------- Grab page elements ----------
     const budgetForm = document.querySelector("#budget-form");
     const budgetInput = document.querySelector("#budget-amount");
@@ -250,7 +269,8 @@ if (document.querySelector("#expense-form")) {
             }
         }
         saveData("expenses", expenses);
-        renderExpenses(); updateSummary();
+        renderExpenses();
+        updateSummary();
         showBudgetMessage("Expense deleted.", "success");
     }
 
@@ -270,8 +290,8 @@ if (document.querySelector("#expense-form")) {
             li.className = "item";
 
             li.innerHTML =
-                "<strong>" + expense.description + "</strong>" +
-                "<span>" + expense.category + " &bull; " + expense.date + "</span>" +
+                "<strong>" + escapeHTML(expense.description) + "</strong>" +
+                "<span>" + escapeHTML(expense.category) + " &bull; " + expense.date + "</span>" +
                 "<span class='badge'>GH₵ " + expense.amount.toFixed(2) + "</span>";
 
             const actions = document.createElement("div");
@@ -354,6 +374,7 @@ if (document.querySelector("#expense-form")) {
     updateSummary();
 }
 
+
 // =====================================================
 // STUDY PLANNER (study.html)
 // =====================================================
@@ -364,6 +385,7 @@ if (document.querySelector("#study-form")) {
     let activities = loadData("activities", []);
     let nextActivityId = 1;
 
+    // Continue the id numbering after the highest saved id
     for (let i = 0; i < activities.length; i++) {
         if (activities[i].id >= nextActivityId) {
             nextActivityId = activities[i].id + 1;
@@ -452,7 +474,8 @@ if (document.querySelector("#study-form")) {
             const status = activity.completed ? "Completed" : "Pending";
 
             li.innerHTML =
-                "<strong>" + activity.subject + ": " + activity.description + "</strong>" +
+                "<strong>" + escapeHTML(activity.subject) + ": " +
+                escapeHTML(activity.description) + "</strong>" +
                 "<span>" + activity.date + "</span>" +
                 "<span class='badge status-" + status.toLowerCase() + "'>" +
                 status + "</span>";
@@ -517,6 +540,7 @@ if (document.querySelector("#study-form")) {
     renderActivities();
     updateStudyProgress();
 }
+
 
 // =====================================================
 // DASHBOARD (index.html)
@@ -598,8 +622,8 @@ if (document.querySelector("#dash-outstanding")) {
             }
 
             li.innerHTML =
-                "<strong>" + task.title + "</strong>" +
-                "<span>" + task.subject + " &bull; Due " + task.due + "</span>" +
+                "<strong>" + escapeHTML(task.title) + "</strong>" +
+                "<span>" + escapeHTML(task.subject) + " &bull; Due " + task.due + "</span>" +
                 "<span class='badge priority-" + task.priority.toLowerCase() + "'>" +
                 task.priority + "</span>" +
                 dueLabel;
