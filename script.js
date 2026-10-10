@@ -1,4 +1,23 @@
 // =====================================================
+// SHARED HELPERS (saving and loading)
+// =====================================================
+
+// Save any value (array, object, number) under a name
+function saveData(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+}
+
+// Load a value by name. If nothing is saved yet, return the fallback.
+function loadData(key, fallback) {
+    const saved = localStorage.getItem(key);
+    if (saved === null) {
+        return fallback;
+    }
+    return JSON.parse(saved);
+}
+
+
+// =====================================================
 // ASSIGNMENT TRACKER (tasks.html)
 // =====================================================
 
@@ -6,9 +25,15 @@
 if (document.querySelector("#task-form")) {
 
     // ---------- Data ----------
-    let tasks = [];     // all assignments live here
-    let nextTaskId = 1; // the id the next assignment will get
+    let tasks = loadData("tasks", []); // load saved assignments, or start empty
+    let nextTaskId = 1;
 
+    // Continue the id numbering after the highest saved id
+    for (let i = 0; i < tasks.length; i++) {
+        if (tasks[i].id >= nextTaskId) {
+            nextTaskId = tasks[i].id + 1;
+        }
+    }
     // ---------- Grab page elements ----------
     const taskForm = document.querySelector("#task-form");
     const titleInput = document.querySelector("#task-title");
@@ -32,6 +57,7 @@ if (document.querySelector("#task-form")) {
                 break;
             }
         }
+        saveData("tasks", tasks);
         renderTasks();
         showTaskMessage("Assignment marked as completed.", "success");
     }
@@ -44,6 +70,7 @@ if (document.querySelector("#task-form")) {
                 break;
             }
         }
+        saveData("tasks", tasks);
         renderTasks();
         showTaskMessage("Assignment deleted.", "success");
     }
@@ -136,6 +163,7 @@ if (document.querySelector("#task-form")) {
         };
         tasks.push(newTask);
         nextTaskId++;
+        saveData("tasks", tasks);
 
         // 4. Update the screen and reset the form
         renderTasks();
@@ -154,10 +182,15 @@ if (document.querySelector("#task-form")) {
 if (document.querySelector("#expense-form")) {
 
     // ---------- Data ----------
-    let startingBudget = 0;
-    let expenses = [];
+    let startingBudget = loadData("startingBudget", 0);
+    let expenses = loadData("expenses", []);
     let nextExpenseId = 1;
 
+    for (let i = 0; i < expenses.length; i++) {
+        if (expenses[i].id >= nextExpenseId) {
+            nextExpenseId = expenses[i].id + 1;
+        }
+    }
     // ---------- Grab page elements ----------
     const budgetForm = document.querySelector("#budget-form");
     const budgetInput = document.querySelector("#budget-amount");
@@ -216,8 +249,8 @@ if (document.querySelector("#expense-form")) {
                 break;
             }
         }
-        renderExpenses();
-        updateSummary();
+        saveData("expenses", expenses);
+        renderExpenses(); updateSummary();
         showBudgetMessage("Expense deleted.", "success");
     }
 
@@ -269,6 +302,7 @@ if (document.querySelector("#expense-form")) {
         }
 
         startingBudget = amount;
+        saveData("startingBudget", startingBudget);
         updateSummary();
         budgetForm.reset();
         showBudgetMessage("Starting budget set.", "success");
@@ -307,6 +341,7 @@ if (document.querySelector("#expense-form")) {
         };
         expenses.push(newExpense);
         nextExpenseId++;
+        saveData("expenses", expenses);
 
         renderExpenses();
         updateSummary();
