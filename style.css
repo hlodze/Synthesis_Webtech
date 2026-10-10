@@ -230,6 +230,30 @@ button:hover {
     grid-template-columns: repeat(2, 1fr);
 }
 
+/* ---------- Dashboard ---------- */
+.summary.dashboard {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.quick-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.link-btn {
+    display: inline-block;
+    padding: 10px 18px;
+    background-color: #2563eb;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+}
+
+.link-btn:hover {
+    background-color: #1d4ed8;
+}
+
 /* ---------- Mobile ---------- */
 @media (max-width: 600px) {
     .site-header {

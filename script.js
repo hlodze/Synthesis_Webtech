@@ -517,3 +517,94 @@ if (document.querySelector("#study-form")) {
     renderActivities();
     updateStudyProgress();
 }
+
+// =====================================================
+// DASHBOARD (index.html)
+// =====================================================
+
+if (document.querySelector("#dash-outstanding")) {
+
+    // ---------- Load the saved data ----------
+    const tasks = loadData("tasks", []);
+    const expenses = loadData("expenses", []);
+    const startingBudget = loadData("startingBudget", 0);
+    const activities = loadData("activities", []);
+
+    // ---------- Grab page elements ----------
+    const outstandingDisplay = document.querySelector("#dash-outstanding");
+    const startingDisplay = document.querySelector("#dash-starting");
+    const remainingDisplay = document.querySelector("#dash-remaining");
+    const studyDisplay = document.querySelector("#dash-study");
+    const upcomingList = document.querySelector("#dash-upcoming");
+
+    // ---------- Collect pending assignments ----------
+    const pending = [];
+    for (let i = 0; i < tasks.length; i++) {
+        if (!tasks[i].completed) {
+            pending.push(tasks[i]);
+        }
+    }
+
+    // ---------- Total expenses and remaining budget ----------
+    let totalExpenses = 0;
+    for (let i = 0; i < expenses.length; i++) {
+        totalExpenses = totalExpenses + expenses[i].amount;
+    }
+    const remaining = startingBudget - totalExpenses;
+
+    // ---------- Count completed study activities ----------
+    let completedStudy = 0;
+    for (let i = 0; i < activities.length; i++) {
+        if (activities[i].completed) {
+            completedStudy++;
+        }
+    }
+
+    // ---------- Fill in the summary cards ----------
+    outstandingDisplay.textContent = pending.length;
+    startingDisplay.textContent = "GH₵ " + startingBudget.toFixed(2);
+    remainingDisplay.textContent = "GH₵ " + remaining.toFixed(2);
+    studyDisplay.textContent = completedStudy;
+
+    if (remaining < 0) {
+        remainingDisplay.className = "stat-value negative";
+    }
+
+    // ---------- Upcoming assignments (soonest first, max 5) ----------
+    pending.sort(function (a, b) {
+        if (a.due < b.due) {
+            return -1; // a comes first
+        }
+        if (a.due > b.due) {
+            return 1;  // b comes first
+        }
+        return 0;
+    });
+
+    const today = new Date().toISOString().slice(0, 10);
+
+    if (pending.length === 0) {
+        upcomingList.innerHTML = "<li class='empty'>No outstanding assignments. Nice work!</li>";
+    } else {
+        for (let i = 0; i < pending.length && i < 5; i++) {
+            const task = pending[i];
+
+            const li = document.createElement("li");
+            li.className = "item";
+
+            let dueLabel = "";
+            if (task.due < today) {
+                dueLabel = "<span class='badge priority-high'>Overdue</span>";
+            }
+
+            li.innerHTML =
+                "<strong>" + task.title + "</strong>" +
+                "<span>" + task.subject + " &bull; Due " + task.due + "</span>" +
+                "<span class='badge priority-" + task.priority.toLowerCase() + "'>" +
+                task.priority + "</span>" +
+                dueLabel;
+
+            upcomingList.appendChild(li);
+        }
+    }
+}

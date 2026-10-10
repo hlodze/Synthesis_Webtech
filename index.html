@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Student Life Hub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <h1>Student Life Hub</h1>
+        <nav>
+            <a href="index.html" class="active">Dashboard</a>
+            <a href="tasks.html">Assignments</a>
+            <a href="budget.html">Budget</a>
+            <a href="study.html">Study Planner</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="card">
+            <h2>Your Summary</h2>
+            <div class="summary dashboard">
+                <div class="stat">
+                    <span class="stat-label">Outstanding assignments</span>
+                    <span class="stat-value" id="dash-outstanding">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Starting budget</span>
+                    <span class="stat-value" id="dash-starting">GH₵ 0.00</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Remaining budget</span>
+                    <span class="stat-value" id="dash-remaining">GH₵ 0.00</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Study activities completed</span>
+                    <span class="stat-value" id="dash-study">0</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Upcoming Assignments</h2>
+            <ul id="dash-upcoming" class="item-list"></ul>
+        </section>
+
+        <section class="card">
+            <h2>Quick Links</h2>
+            <div class="quick-links">
+                <a href="tasks.html" class="link-btn">Manage Assignments</a>
+                <a href="budget.html" class="link-btn">Manage Budget</a>
+                <a href="study.html" class="link-btn">Plan Study Time</a>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
